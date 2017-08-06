@@ -2,8 +2,36 @@
 tidying data project
 
 
-##This file explains how the script contained in run_analysis.R works to take the data set provided and out put a tidy data set meeting particular criteria.
+##This file explains how the script contained in run_analysis.R works to take the data set provided and out put a tidy data set meeting particular criteria.  First, it summarizes the full process.  Below, you can see the explanation go line by line with the code.
 
+
+Summary:
+
+##The function begins by first storing the current working directory into a variable, so that the working directory can be reset after the function has completed its operations.## 
+##Next, the function changes the working directory to be the folder containing all of the Samsung data.##    
+##Next, the function reads the test and train files into dataframe objects.##    
+##Next, the function, keeps only the columns that deal with "mean" or "std" measurements/calculations.##  
+##Next, the function, keeps only the columns that deal with "mean" or "std" measurements/calculations.##  
+##Next, all the columns that we keep (mean and std variables) are given appropriate column names.##
+ ##Next, the two data frames, test and train, are pasted together into a single dataframe, the test observations or rows being on top.## 
+ ##Next, the numbers that code which activity generated each observation for the test and trainging data are loaded into R objects##
+ ##Next, the numbers in each of these activity lists, test and training, are replaced with the activity description they stand for##   
+ ##The two activity lists are pasted together into a single activity list, test on top.##
+##Next, the lists of which subject performed each observation line is loaded for both the test and training data.##   
+##These subject lists are pasted together, test on top.##
+##Next, the Activities list and the Subject list are pasted as columns to the front of the data frame containing all the variables having to do with mean and std.##
+##The pasted Activity and Subject columns are given appropriate names.##
+##A new data frame is generated from the first one that computes the averages of all the observations according to the Activity.##
+##This new data frame is cleaned up a bit, given some appropriate names and fields indicating that the variables are the means for all subjects aggregated together, according to activity type.##
+##Another new data frame is generated from the original data frame that was pasted together.  This one averages the variable readings according to Subject x Activity.##
+##This new data frame is cleaned up and labeled accordingly, indicated what the means are representing.##
+##A third new date frame is created from the original pasted together one, this one computing means of the variables according to Subject only, aggregating all activities performed by each subject.##
+##This third new data frame is cleaned up and labeled.##
+##The three newly created data frames that compute means according to Subject, Activity, and Subject x Activity are pasted together, one on top of the other, to give a final data frame containing means of the original means/std variables calculated according to all the relevant groupings.##
+##The original working directory is made to be the current one.##
+##The final data frame is outputted to a file of the appropriate name.##
+
+Line by line with the Code:
 
 ##The function begins by first storing the current working directory into a variable, so that the working directory can be reset after the function has completed its operations.## 
 function () 
@@ -122,59 +150,59 @@ function ()
     trainActivities[trainActivities == 2] <- "Walking_Upstairs"
     trainActivities[trainActivities == 1] <- "Walking"
     
-##The two activity lists are pasted together into a single activity list, test on top.    
+##The two activity lists are pasted together into a single activity list, test on top.##    
     allActivities <- rbind(testActivities, trainActivities)
     
-##Next, the lists of which subject performed each observation line is loaded for both the test and training data.    
+##Next, the lists of which subject performed each observation line is loaded for both the test and training data.##    
     subjectTest <- read.csv("./test/subject_test.txt", header = FALSE)
     subjectTrain <- read.csv("./train/subject_train.txt", header = FALSE)
     
-##These subject lists are pasted together, test on top.    
+##These subject lists are pasted together, test on top.##    
     allSubject <- rbind(subjectTest, subjectTrain)
     
-##Next, the Activities list and the Subject list are pasted as columns to the front of the data frame containing all the variables having to do with mean and std. 
+##Next, the Activities list and the Subject list are pasted as columns to the front of the data frame containing all the variables having to do with mean and std.## 
     xAll <- cbind(allActivities, allSubject, xAll)
     
-##The pasted Activity and Subject columns are given appropriate names.    
+##The pasted Activity and Subject columns are given appropriate names.##    
     colnames(xAll)[1] <- "Activity"
     colnames(xAll)[2] <- "Subject"
     
-##A new data frame is generated from the first one that computes the averages of all the observations according to the Activity.    
+##A new data frame is generated from the first one that computes the averages of all the observations according to the Activity.##    
     xActivity <- aggregate(xAll, by = list(xAll$Activity), FUN = mean, 
         na.rm = TRUE)
         
-##This new data frame is cleaned up a bit, given some appropriate names and fields indicating that the variables are the means for all subjects aggregated together, according to activity type.        
+##This new data frame is cleaned up a bit, given some appropriate names and fields indicating that the variables are the means for all subjects aggregated together, according to activity type.##        
     xActivity <- xActivity[, -c(2, 3)]
     sub <- matrix("All", 6, 1)
     library(tibble)
     xActivity <- add_column(xActivity, as.character(sub), .after = 1)
     colnames(xActivity)[c(1, 2)] <- c("Activity", "Subject")
     
-##Another new data frame is generated from the original data frame that was pasted together.  This one averages the variable readings according to Subject x Activity.      
+##Another new data frame is generated from the original data frame that was pasted together.  This one averages the variable readings according to Subject x Activity.##      
     xActivitySubject <- aggregate(xAll, by = list(xAll$Activity, 
         xAll$Subject), FUN = mean, na.rm = TRUE)
         
-##This new data frame is cleaned up and labeled accordingly, indicated what the means are representing.        
+##This new data frame is cleaned up and labeled accordingly, indicated what the means are representing.##        
     colnames(xActivitySubject)[c(1, 2)] <- c("Activity", "Subject")
     xActivitySubject <- xActivitySubject[, -c(3, 4)]
     
-##A third new date frame is created from the original pasted together one, this one computing means of the variables according to Subject only, aggregating all activities performed by each subject.    
+##A third new date frame is created from the original pasted together one, this one computing means of the variables according to Subject only, aggregating all activities performed by each subject.##    
     xSubject <- aggregate(xAll, by = list(xAll$Subject), FUN = mean, 
         na.rm = TRUE)
         
-##This third new data frame is cleaned up and labeled.        
+##This third new data frame is cleaned up and labeled.##        
     xSubject <- xSubject[, -c(2, 3)]
     act <- matrix("All", 30, 1)
     xSubject <- add_column(xSubject, as.character(act), .after = 0)
     colnames(xSubject)[c(1, 2)] <- c("Activity", "Subject")
     
-##The three newly created data frames that compute means according to Subject, Activity, and Subject x Activity are pasted together, one on top of the other, to give a final data frame containing means of the original means/std variables calculated according to all the relevant groupings.    
+##The three newly created data frames that compute means according to Subject, Activity, and Subject x Activity are pasted together, one on top of the other, to give a final data frame containing means of the original means/std variables calculated according to all the relevant groupings.##    
     xMeans <- rbind(xActivity, xActivitySubject, xSubject)
     
-##The original working directory is made to be the current one.    
+##The original working directory is made to be the current one.##    
     setwd(startingWD)
     
-##The final data frame is outputted to a file of the appropriate name.
+##The final data frame is outputted to a file of the appropriate name.##
     write.table(xMeans, file = "tidydata.txt", row.name = FALSE)
 }
 
